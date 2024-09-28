@@ -1,8 +1,8 @@
-// components/UserCard.tsx
-
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, Dimensions } from 'react-native';
 import { differenceInHours } from 'date-fns';
+
+const { width } = Dimensions.get('window');
 
 const UserCard = ({ user, elapsedTime, parseElogios, currentDateTime }) => {
   const elogiosArray = parseElogios(user.elogios);
@@ -17,13 +17,13 @@ const UserCard = ({ user, elapsedTime, parseElogios, currentDateTime }) => {
 
   return (
     <View style={styles.userContainer}>
-      <Text style={styles.text}>User ID: {user.id}</Text>
-      <Text style={styles.text}>Random String: {user.random_string}</Text>
+      <Text style={styles.userIdText}>User ID: {user.id}</Text>
+      <Text style={styles.randomStringText}>Random String: {user.random_string}</Text>
 
       {currentElogio ? (
-        <Text style={styles.elogio}>{currentElogio.text}</Text>
+        <Text style={styles.elogioText}>"{currentElogio.text}"</Text>
       ) : (
-        <Text style={styles.text}>No elogios available.</Text>
+        <Text style={styles.noElogioText}>No elogios available.</Text>
       )}
 
       {currentImage ? (
@@ -32,7 +32,7 @@ const UserCard = ({ user, elapsedTime, parseElogios, currentDateTime }) => {
           source={{ uri: `https://laqxbdncmapnhorlbbkg.supabase.co/storage/v1/object/public/images/${currentImage}` }}
         />
       ) : (
-        <Text style={styles.text}>No image available.</Text>
+        <Text style={styles.noImageText}>No image available.</Text>
       )}
 
       <Text style={styles.elapsedTime}>Dating for: {elapsedTime}</Text>
@@ -42,30 +42,56 @@ const UserCard = ({ user, elapsedTime, parseElogios, currentDateTime }) => {
 
 const styles = StyleSheet.create({
   userContainer: {
-    marginTop: 20,
-    padding: 15,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
+    marginVertical: 20,
+    padding: 20,
+    backgroundColor: '#FFEBE5',
+    borderRadius: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    alignItems: 'center',
   },
-  text: {
+  userIdText: {
     fontSize: 16,
+    color: '#555',
     marginBottom: 5,
   },
-  elogio: {
+  randomStringText: {
+    fontSize: 16,
+    color: '#555',
+    marginBottom: 10,
+  },
+  elogioText: {
+    fontSize: 18,
     fontStyle: 'italic',
-    marginBottom: 5,
+    color: '#D6336C',
+    textAlign: 'center',
+    marginBottom: 15,
+  },
+  noElogioText: {
+    fontSize: 16,
+    color: '#888',
+    marginBottom: 10,
   },
   image: {
-    width: 200,
-    height: 200,
-    resizeMode: 'contain',
-    marginTop: 10,
+    width: width - 80,
+    height: (width - 80) * 1.2,
+    borderRadius: 10,
+    marginBottom: 15,
+    resizeMode: 'cover',
+  },
+  noImageText: {
+    fontSize: 16,
+    color: '#888',
+    marginBottom: 10,
   },
   elapsedTime: {
-    fontSize: 18,
-    marginTop: 10,
+    fontSize: 20,
     fontWeight: 'bold',
+    color: '#D6336C',
+    marginTop: 10,
   },
 });
 

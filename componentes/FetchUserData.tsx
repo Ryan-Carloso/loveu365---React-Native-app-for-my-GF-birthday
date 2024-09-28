@@ -1,10 +1,10 @@
-// components/FetchUserData.tsx
-
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, ScrollView, StyleSheet, SafeAreaView, Dimensions } from 'react-native';
 import axios from 'axios';
-import UserCard from './usecard';
+import UserCard from './usecard'; // Ensure the path is correct
 import { parseElogios } from './utils';
+
+const { width } = Dimensions.get('window');
 
 const FetchUserData = () => {
   const [randomString, setRandomString] = useState('');
@@ -28,7 +28,7 @@ const FetchUserData = () => {
       if (response.data.length > 0) {
         setUserData(response.data);
         setErrorMessage('');
-        calculateElapsedTime(response.data[0].date_time); // Get the first user's date_time
+        calculateElapsedTime(response.data[0].date_time);
       } else {
         setUserData([]);
         setErrorMessage('No data found for the provided random string.');
@@ -41,10 +41,10 @@ const FetchUserData = () => {
 
   const calculateElapsedTime = (dateTime) => {
     const startDate = new Date(dateTime);
-    
+
     const interval = setInterval(() => {
       const now = new Date();
-      const diff = now - startDate; // Difference in milliseconds
+      const diff = now - startDate;
 
       const seconds = Math.floor((diff / 1000) % 60);
       const minutes = Math.floor((diff / (1000 * 60)) % 60);
@@ -54,57 +54,88 @@ const FetchUserData = () => {
       setElapsedTime(`${days}d ${hours}h ${minutes}m ${seconds}s`);
     }, 1000);
 
-    // Clean up the interval on component unmount
     return () => clearInterval(interval);
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Fetch User Data from Supabase</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter random string"
-        value={randomString}
-        onChangeText={setRandomString}
-      />
-      <Button title="Fetch Data" onPress={fetchData} />
+    <SafeAreaView style={styles.safeContainer}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Text style={styles.title}>Fetch User Data</Text>
 
-      {errorMessage ? (
-        <Text style={styles.error}>{errorMessage}</Text>
-      ) : (
-        userData.map((user, index) => (
-            <UserCard 
-              key={index} 
-              user={user} 
-              elapsedTime={elapsedTime} 
-              parseElogios={parseElogios} 
-              currentDateTime={new Date().toISOString()} // Pass current time here
-            />
-          ))
-      )}
-    </ScrollView>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter random string"
+            value={randomString}
+            onChangeText={setRandomString}
+          />
+          <Button title="Fetch Data" onPress={fetchData} color="#D6336C" />
+        </View>
+
+        {errorMessage ? (
+          <Text style={styles.error}>{errorMessage}</Text>
+        ) : (
+          <View style={styles.resultsContainer}>
+            {userData.map((user, index) => (
+              <UserCard
+                key={index}
+                user={user}
+                elapsedTime={elapsedTime}
+                parseElogios={parseElogios}
+                currentDateTime={new Date().toISOString()}
+              />
+            ))}
+          </View>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  safeContainer: {
+    flex: 1,
+    backgroundColor: '#FFF8F0',
+  },
+  scrollContainer: {
     padding: 20,
+    alignItems: 'center',
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
+    color: '#D6336C',
     marginBottom: 20,
+    textAlign: 'center',
+  },
+  inputContainer: {
+    width: width - 40,
+    marginBottom: 20,
+    backgroundColor: '#FFEBE5',
+    borderRadius: 12,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   input: {
-    marginBottom: 10,
     padding: 10,
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
+    borderColor: '#D6336C',
+    borderRadius: 8,
+    marginBottom: 10,
+    backgroundColor: '#FFF',
   },
   error: {
     color: 'red',
-    marginTop: 20,
+    fontSize: 16,
+    marginTop: 10,
+    textAlign: 'center',
+  },
+  resultsContainer: {
+    width: '100%',
   },
 });
 
