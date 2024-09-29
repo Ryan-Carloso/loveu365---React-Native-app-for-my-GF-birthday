@@ -61,8 +61,15 @@ export const styles = StyleSheet.create({
     marginVertical: 20,
     textAlign: 'center',
   },
+  TextBelow: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#D6336C',
+    marginBottom: 5,
+    textAlign: 'center',
+  },
   elogioText: {
-    fontSize: 18,
+    fontSize: 20,
     fontStyle: 'italic',
     color: '#555',
     textAlign: 'center',
@@ -114,14 +121,14 @@ export const styles = StyleSheet.create({
   codeInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 5,
   },
-  codeInput: {
+  TextcodeInput: {
     borderWidth: 1,
     borderColor: '#D6336C',
     borderRadius: 8,
     padding: 10,
-    flex: 1,
+    width: 250, // Largura fixa de 250 pixels
     marginRight: 10,
     backgroundColor: '#FFF',
   },
