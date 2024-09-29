@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Image, SafeAreaView, ScrollView, Alert } from 'react-native';
 import axios, { AxiosResponse } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Notifications from 'expo-notifications';
 import styles from '../styles/styles';
 import CodeInput from '../componentes/codeInput';
 import ElapsedTime from '../componentes/elapsedTime';
@@ -33,6 +34,22 @@ const App: React.FC = () => {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
 
   useEffect(() => {
+    const requestPermissions = async () => {
+      const { status } = await Notifications.getPermissionsAsync();
+      console.log('Current permission status:', status);
+      if (status !== 'granted') {
+        const { status: newStatus } = await Notifications.requestPermissionsAsync();
+        console.log('New permission status:', newStatus);
+        if (newStatus !== 'granted') {
+          Alert.alert('Permission not granted', 'You need to enable notifications in settings.');
+        }
+      }
+    };
+
+    requestPermissions();
+  }, []);
+
+  useEffect(() => {
     const loadCode = async () => {
       try {
         const storedCode = await AsyncStorage.getItem('userCode');
@@ -49,19 +66,21 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (elogiosArray.length > 0 && imageUrls.length > 0) {
-      const interval = setInterval(() => {
+    const interval = setInterval(() => {
+      if (elogiosArray.length > 0 && imageUrls.length > 0) {
+        console.log('Changing elogio and image');
         setCurrentElogioIndex((prevIndex) => (prevIndex + 1) % elogiosArray.length); // Change elogio index
         setCurrentImageIndex((prevIndex) => (prevIndex + 1) % imageUrls.length); // Change image index
-      }, 1800); // 5 hours in milliseconds
+      }
+    }, 1800); // Change this to 18000000 for 5 hours in milliseconds
 
-      return () => clearInterval(interval);
-    }
+    return () => clearInterval(interval);
   }, [elogiosArray, imageUrls]);
 
   useEffect(() => {
     if (elogiosArray.length > 0) {
       setCurrentElogio({ text: elogiosArray[currentElogioIndex] });
+      scheduleNotification(); // Reschedule notification on elogio change
     }
   }, [currentElogioIndex, elogiosArray]);
 
@@ -87,30 +106,36 @@ const App: React.FC = () => {
         }
       );
 
+      console.log('API Response:', response.data); // Log the API response
+
       if (response.data.length > 0) {
         const fetchedData: User = response.data[0];
-
-        // Log the fetched data from the database
         console.log('Fetched data from the database:', fetchedData);
 
         const elogiosData: string = fetchedData.elogios;
 
         if (elogiosData) {
           const elogiosText = elogiosData
-            .replace(/\\/g, '') // Remove backslashes
-            .match(/"([^"]+)"/g) // Extract elogios between quotes
-            ?.map((elogio) => elogio.replace(/"/g, '').trim()) // Remove quotes and unnecessary spaces
+            .replace(/\\/g, '')
+            .match(/"([^"]+)"/g)
+            ?.map((elogio) => elogio.replace(/"/g, '').trim());
 
+          console.log('Elogios fetched:', elogiosText); // Log elogios
           if (elogiosText) {
-            setElogiosArray(elogiosText); // Store cleaned elogios
-            setCurrentElogio({ text: elogiosText[0] }); // Display the first elogio
+            setElogiosArray(elogiosText);
+            setCurrentElogio({ text: elogiosText[0] });
+          } else {
+            console.log('Elogios array is empty.');
           }
         }
 
         const imageUrls: string[] = JSON.parse(fetchedData.image_urls);
+        console.log('Image URLs fetched:', imageUrls); // Log image URLs
         if (imageUrls.length > 0) {
-          setImageUrls(imageUrls); // Store all image URLs
-          setCurrentImage(imageUrls[0]); // Set the first image
+          setImageUrls(imageUrls);
+          setCurrentImage(imageUrls[0]);
+        } else {
+          console.log('Image URLs array is empty.');
         }
 
         setCoupleName(fetchedData.couplename);
@@ -118,6 +143,7 @@ const App: React.FC = () => {
           setStartDate(new Date(fetchedData.date_time));
         }
       } else {
+        console.log('No data found for the given code.');
         Alert.alert('Error', 'No data found for the given code.');
       }
     } catch (error: any) {
@@ -135,6 +161,24 @@ const App: React.FC = () => {
     } catch (error: any) {
       console.error('Error saving code:', error.message);
       Alert.alert('Error', 'Could not save code. Please try again.');
+    }
+  };
+
+  const scheduleNotification = async () => {
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "Time for a new elogio!",
+          body: currentElogio ? currentElogio.text : "No elogios available.",
+          icon: 'assets/icon.png', // caminho para o seu ícone
+        },
+        trigger: {
+          seconds: 1, //test 
+        },
+      });
+      console.log('Notification scheduled successfully.');
+    } catch (error) {
+      console.error('Error scheduling notification:', error);
     }
   };
 

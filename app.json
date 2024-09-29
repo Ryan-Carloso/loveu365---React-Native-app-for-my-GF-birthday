@@ -2,7 +2,7 @@
   "expo": {
     "name": "loveu365",
     "slug": "loveu365",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -13,17 +13,24 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ryancarlos1.loveu365"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.ryancarlos1.loveu365"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "scheme": "loveu365"
+    "scheme": "loveu365",
+    "extra": {
+      "eas": {
+        "projectId": "04e2493f-50da-4871-9155-39ad885ecdcc"
+      }
+    }
   }
 }
